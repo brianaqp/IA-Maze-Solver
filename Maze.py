@@ -5,8 +5,10 @@ import sys
 class Maze():
     def __init__(self):
         """Se inicializan las variables"""
-        self.lista_abierta = []
-        self.lista_cerrada = []
+        self.start = 0
+        self.end = 0
+        self.tablero = self.crear_tablero()
+        self.tablero_color = []
 
     def crear_tablero(self):
         tablero = [
@@ -23,29 +25,29 @@ class Maze():
         ]
         return tablero
 
-    def imprimir_tablero(self, tablero):
-        for i in range(len(tablero)):
-            for j in range(len(tablero[i])):
-                print(str(tablero[i][j]).ljust(2), end=' ')
+    def imprimir_tablero(self):
+        for i in range(len(self.tablero)):
+            for j in range(len(self.tablero[i])):
+                print(str(self.tablero[i][j]).ljust(2), end=' ')
             print()
 
-    def ambientar_tablero(self, tablero, start, end):
-        for i in range(len(tablero)):
-            for j in range(len(tablero[i])):
-                if tablero[i][j] == 0:
-                    tablero[i][j] = 0
-                if tablero[i][j] == 1:
-                    tablero[i][j] = "#"
-        if tablero[start[0]][start[1]] == "#":
+    def ambientar_tablero(self, start, end):
+        for i in range(len(self.tablero)):
+            for j in range(len(self.tablero[i])):
+                if self.tablero[i][j] == 0:
+                    self.tablero[i][j] = 0
+                if self.tablero[i][j] == 1:
+                    self.tablero[i][j] = "#"
+        if self.tablero[start[0]][start[1]] == "#":
             print("Escoja otra posicion inicial.")
             sys.exit(0)
         else:
-            tablero[start[0]][start[1]] = 1
-        if tablero[end[0]][end[1]] == "#":
+            self.tablero[start[0]][start[1]] = 1
+        if self.tablero[end[0]][end[1]] == "#":
             print("Escoja otra posicion inicial.")
             sys.exit(0)
         else:
-            tablero[end[0]][end[1]] = "X"
+            self.tablero[end[0]][end[1]] = "X"
 
     def f(self, inicio, final):
         """Funcion evaluacion"""
@@ -53,6 +55,60 @@ class Maze():
     def h(self, inicio, final):
         """heuristica, costo de movernos entre fichas"""
         pass
+
+    def cambia_un_valor_en_tablero(self, tablero, var_old, var_new):
+        for fila in range(len(tablero)):
+            for columna in range(len(tablero[fila])):
+                if tablero[fila][columna] == var_old:
+                    tablero[fila][columna] = var_new
+        return tablero
+
+    def colorear_laberinto(self, tablero, start, end, camino):
+        """Colorear el laberinto para su prueba final"""
+        self.imprimir_tablero()
+        print("")
+        # Primero cambiar los obstaculos a un numero mas grande
+        self.cambia_un_valor_en_tablero(tablero, "#", 80)
+        print("Se cambiaron los obstaculos por 80")
+        self.imprimir_tablero()
+        # Los 0 sobrantes ahora tendran un #
+        self.cambia_un_valor_en_tablero(tablero, 0, "#")
+        print("\n")
+        self.imprimir_tablero()
+        print("")
+        # Ahora cambiar la ruta
+        k = len(camino)
+        while len(camino) > 0:
+            fila = camino[len(camino)-1][0]
+            colu = camino[len(camino)-1][1]
+            #print(":", fila, ":", colu) Se imprimen las filas y columnas actuales
+            tablero[fila][colu] = 0
+            camino.pop()
+        self.imprimir_tablero()
+        # Ahora cambiar los caminos no escogidos
+        for i in range(1,k):
+            self.cambia_un_valor_en_tablero(tablero, i, 50)
+        self.imprimir_tablero()
+        #Por ultimo cambiar los asteriscos
+        self.cambia_un_valor_en_tablero(tablero, "#", 5)
+        self.imprimir_tablero()
+        # y la linea
+        self.cambia_un_valor_en_tablero(tablero, 0, 100)
+        self.imprimir_tablero()
+        plt.matshow(tablero)
+        plt.colorbar()
+        plt.show()
+
+class Node():
+    """Necesitamos una clase nodo para ir trabajando recursivamente"""
+    def __init__(self, padre=None, position=None):
+        self.padre = padre
+        self.position = position
+        self.k = 0
+        # Funcion evaluacion
+        self.g = 0
+        self.f = 0
+        self.h = 0
 
     def dar_paso(self, k, tablero, end):
         """Da los pasos buscando el numero, A sus vecinos los denomina con un k+1"""
@@ -148,72 +204,26 @@ class Maze():
                     return camino
                 """FIN PARTE PESADA"""
 
-    def cambia_un_valor_en_tablero(self, tablero, var_old, var_new):
-        for fila in range(len(tablero)):
-            for columna in range(len(tablero[fila])):
-                if tablero[fila][columna] == var_old:
-                    tablero[fila][columna] = var_new
-        return tablero
 
-    def colorear_laberinto(self, tablero, start, end, camino):
-        """Colorear el laberinto para su prueba final"""
-        self.imprimir_tablero(tablero)
-        print("")
-        # Primero cambiar los obstaculos a un numero mas grande
-        self.cambia_un_valor_en_tablero(tablero, "#", 80)
-        print("Se cambiaron los obstaculos por 80")
-        self.imprimir_tablero(tablero)
-        # Los 0 sobrantes ahora tendran un #
-        self.cambia_un_valor_en_tablero(tablero, 0, "#")
-        print("\n")
-        self.imprimir_tablero(tablero)
-        print("")
-        # Ahora cambiar la ruta
-        k = len(camino)
-        while len(camino) > 0:
-            fila = camino[len(camino)-1][0]
-            colu = camino[len(camino)-1][1]
-            #print(":", fila, ":", colu) Se imprimen las filas y columnas actuales
-            tablero[fila][colu] = 0
-            camino.pop()
-        self.imprimir_tablero(tablero)
-        # Ahora cambiar los caminos no escogidos
-        for i in range(1,k):
-            self.cambia_un_valor_en_tablero(tablero, i, 50)
-        self.imprimir_tablero(tablero)
-        #Por ultimo cambiar los asteriscos
-        self.cambia_un_valor_en_tablero(tablero, "#", 5)
-        self.imprimir_tablero(tablero)
-        # y la linea
-        self.cambia_un_valor_en_tablero(tablero, 0, 100)
-        self.imprimir_tablero(tablero)
-
-        plt.matshow(tablero)
-        plt.colorbar()
-        plt.show()
-
-    def main(self):
-        print("Iniciando...")
-        tablero = self.crear_tablero()
-        start = 1,1
-        end =  5,18
-        self.ambientar_tablero(tablero, start, end)
-        self.imprimir_tablero(tablero)
-        print(tablero[0][1])
-        print(tablero[1][1])
-        print("Primera iteracion: ")
-        k = self.encontrar_camino(tablero, end)
-        camino = self.camino_de_regres(tablero, start, end, k)
-        self.imprimir_tablero(tablero)
-        print(camino)
-        tablero_coloredo = copy.deepcopy(tablero)
-        self.colorear_laberinto(tablero_coloredo, start, end, camino)
-
-
-
-
-nuevo_juego = Maze()
-nuevo_juego.main()
+if __name__ == '__main__':
+    print("Iniciando...")
+    nodo = Node()
+    maze = Maze()
+    """Primero se inicializan los objetos a utilizar"""
+    maze.start = 1, 1
+    maze.end = 5, 18
+    maze.ambientar_tablero(maze.start, maze.end)
+    maze.imprimir_tablero()
+    print(maze.tablero[0][1])
+    print(maze.tablero[1][1])
+    print("Primera iteracion: ")
+    nodo.k = nodo.encontrar_camino(maze.tablero, maze.end)
+    camino = nodo.camino_de_regres(maze.tablero, maze.start, maze.end, nodo.k)
+    maze.imprimir_tablero()
+    print(camino)
+    tablero_coloredo = copy.deepcopy(maze.tablero)
+    maze.tablero_color = copy.deepcopy(maze.tablero)
+    maze.colorear_laberinto(maze.tablero_color, maze.start, maze.end, camino)
 
 
 # tengo que hacer varios pasos para verificar el programa
