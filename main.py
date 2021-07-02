@@ -208,7 +208,7 @@ class Node():
 if __name__ == '__main__':
     print("Iniciando...")
     print("Seleccion de algoritmo:\n1.- Resolucion por Primero en anchira\n2.- Resolucion con A* y Voraz")
-    seleccion = input()
+    seleccion = int(input())
     print(seleccion, type(seleccion))
     if seleccion != 1 and seleccion != 2:
         print("Escoja una opcion en la lista!!!")
@@ -222,7 +222,6 @@ if __name__ == '__main__':
     maze.imprimir_tablero()
     print(maze.tablero[0][1])
     print(maze.tablero[1][1])
-    print("Primera iteracion: ")
     nodo.k = nodo.encontrar_camino(maze.tablero, maze.end)
     camino = nodo.camino_de_regres(maze.tablero, maze.start, maze.end, nodo.k)
     maze.imprimir_tablero()
