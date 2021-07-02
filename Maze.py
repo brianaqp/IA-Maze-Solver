@@ -207,6 +207,12 @@ class Node():
 
 if __name__ == '__main__':
     print("Iniciando...")
+    print("Seleccion de algoritmo:\n1.- Resolucion por Primero en anchira\n2.- Resolucion con A* y Voraz")
+    seleccion = input()
+    print(seleccion, type(seleccion))
+    if seleccion != 1 and seleccion != 2:
+        print("Escoja una opcion en la lista!!!")
+        sys.exit()
     nodo = Node()
     maze = Maze()
     """Primero se inicializan los objetos a utilizar"""
