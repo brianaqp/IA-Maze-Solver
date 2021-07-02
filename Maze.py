@@ -233,3 +233,4 @@ if __name__ == '__main__':
 
 
 # tengo que hacer varios pasos para verificar el programa
+# Cambios realizados en el Astar
