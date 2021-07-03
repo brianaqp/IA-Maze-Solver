@@ -1,3 +1,4 @@
+import sys
 import math
 class Maze():
     def __init__(self):
@@ -60,7 +61,7 @@ class Nodo():
         self.position = position
         self.k = 0
         # Funcion evaluacion
-        self.g = 1
+        self.g = 0
         self.f = 0
         self.h = 0
         self.nivel = 0
@@ -103,19 +104,11 @@ class Nodo():
         print(tablero[self.position[0]][self.position[1]])
         tablero[self.position[0]][self.position[1]] = int(self.f)
 
-
-    def encontrar_camino(self, tablero, end):
-        contador = 1
-        while tablero[end[0]][end[1]] == "X":
-            self.dar_paso(contador, tablero, end)
-            contador += 1
-        print("Camino encontrado! -------------")
-        return contador
-
     def costo_aumenta(self):
         self.g += 1
 
     def funcion_evaluacion(self, maze):
+        self.g += 1
         end = maze.end
         print("\nEn funcion_evaluacion...")
         print("Punto actual: ", self.position )
@@ -151,10 +144,36 @@ if __name__ == '__main__':
         if maze.tablero[maze.end[0]][maze.end[1]] != "X":
             print("Camino encontrado!")
             # process = False
+            maze.imprimir_tablero()
             break
-        lista_hijo = nodo_actual.dar_paso_astar(maze)    # Recibi una lista de hijos en donde a cada uno se le saco la f
+        lista_hijos = nodo_actual.dar_paso_astar(maze)    # Recibi una lista de hijos en donde a cada uno se le saco la f
         maze.imprimir_tablero()
-        break
+        for i in lista_hijos: lista_abierta.append(i)   # Se anadio la expansion a la lista abierta
+        print("Lista abierta: ")
+        for i in lista_abierta:
+            print(i)
+        lista_abierta.remove(nodo_actual)
+        lista_cerrada.append(nodo_actual)
+        print("Lista abierta con el actual removido: ")
+        for i in lista_abierta:
+            print(i, " f:", i.f)
+        print("Lista cerrada: ")
+        for i in lista_cerrada:
+            print(i)
+        #   Ahora sigue ordenar la lista de mayor a menor
+        contador = 0
+        lista_aux = []
+        for i in lista_abierta:
+            print(contador, ":", i.f)
+            lista_aux.append(i.f)
+        print("Index valor minimo: ", lista_aux.index(min(lista_aux)))
+        index_nodo_menor = lista_aux.index(min(lista_aux))
+        nodo_actual = lista_abierta[index_nodo_menor]
+        print("Costo actual: ", nodo_actual.g)
+        """" Aqui seria el final del ciclo"""
+
+
+
 
 
 
