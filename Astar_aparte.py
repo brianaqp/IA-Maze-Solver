@@ -1,5 +1,7 @@
 import sys
 import math
+
+
 class Maze():
     def __init__(self):
         """Se inicializan las variables"""
@@ -50,18 +52,20 @@ class Maze():
     def f(self, inicio, final):
         """Funcion evaluacion"""
         pass
+
     def h(self, inicio, final):
         """heuristica, costo de movernos entre fichas"""
         pass
 
+
 class Nodo():
     """Necesitamos una clase nodo para ir trabajando recursivamente"""
+
     def __init__(self, padre=None, position=None):
         self.padre = padre
         self.position = position
         self.k = 0
         # Funcion evaluacion
-        self.g = 0
         self.f = 0
         self.h = 0
         self.nivel = 0
@@ -70,23 +74,27 @@ class Nodo():
         """Da los pasos buscando obtaculos, espacios ya ocupados y el final"""
         #   Posiciones actuales
         tablero = maze.tablero
-        fila = self.position[0] # Nodo actual
+        fila = self.position[0]  # Nodo actual
         columna = self.position[1]
         direcciones = []
         lista_hijos = []
         print("Fila: ", fila, "Columna: ", columna)
         """Revisa arriba"""  # que es lo que tengo que revisar? 1.- Si se salio del borde, y si hay obstruccion
-        if fila-1 >= 0 and tablero[fila-1][columna] != "#" and tablero[fila-1][columna] == 0 or tablero[fila-1][columna] == "X": #si mi fila-1 no se sale del index, ok; y si es diferente de #, ok.
+        if fila - 1 >= 0 and tablero[fila - 1][columna] != "#" and tablero[fila - 1][columna] == 0 or tablero[fila - 1][
+            columna] == "X":  # si mi fila-1 no se sale del index, ok; y si es diferente de #, ok.
             direcciones.append([fila - 1, columna])
         """Revisa abajo"""
-        if fila+1 <= len(tablero) and tablero[fila+1][columna] != "#" and tablero[fila+1][columna] == 0 or tablero[fila+1][columna] == "X": #si mi fila+1 no se sale del index, ok; y si es diferente de #, ok.
+        if fila + 1 <= len(tablero) and tablero[fila + 1][columna] != "#" and tablero[fila + 1][columna] == 0 or \
+                tablero[fila + 1][columna] == "X":  # si mi fila+1 no se sale del index, ok; y si es diferente de #, ok.
             direcciones.append([fila + 1, columna])
         """Revisa derecha"""
-        if columna+1 <= len(tablero[fila]) and tablero[fila][columna+1] != "#" and tablero[fila][columna+1] == 0 or tablero[fila][columna+1] == "X":
-            direcciones.append([fila, columna+1])
+        if columna + 1 <= len(tablero[fila]) and tablero[fila][columna + 1] != "#" and tablero[fila][
+            columna + 1] == 0 or tablero[fila][columna + 1] == "X":
+            direcciones.append([fila, columna + 1])
         """Revisa izquierda"""
-        if columna - 1 >= 0 and tablero[fila][columna - 1] != "#" and tablero[fila][columna - 1] == 0 or tablero[fila][columna - 1] == "X":
-            direcciones.append([fila, columna-1])
+        if columna - 1 >= 0 and tablero[fila][columna - 1] != "#" and tablero[fila][columna - 1] == 0 or tablero[fila][
+            columna - 1] == "X":
+            direcciones.append([fila, columna - 1])
         print("Direcciones conseguidas: ", direcciones)
         if direcciones is None:
             return
@@ -104,22 +112,88 @@ class Nodo():
         print(tablero[self.position[0]][self.position[1]])
         tablero[self.position[0]][self.position[1]] = int(self.f)
 
-    def costo_aumenta(self):
-        self.g += 1
-
     def funcion_evaluacion(self, maze):
-        self.g += 1
         end = maze.end
         print("\nEn funcion_evaluacion...")
-        print("Punto actual: ", self.position )
+        print("Punto actual: ", self.position)
         print("Punto destino: ", end)
         x_final, x_inicial = end[0], self.position[0]
         y_final, y_inicial = end[1], self.position[1]
         self.h = math.sqrt((x_final - x_inicial) ** 2 + (y_final - y_inicial) ** 2)
-        self.f = self.g + self.h
+        self.f = g + self.h
         print(self.f)
 
+    def camino_de_regres(self, tablero, start, end, lista_cerrada):
+        """Esta funcion lo que hara es basicamente ir
+           restando para encontrar el camino mas corto. """
+        contador = 0
+        pos = []
+        print("--- En funcion camino_de_regres():")
+        process = True
+        minimo = tablero[maze.end[0]][maze.end[1]]
+        camino = []
+        caminos_visitados = []
+        opciones = []
+        fila_actual = maze.end[0]
+        columna_actual = maze.end[1]
+        camino.append(maze.end)
+        while process:
+
+            """ INICIO PARTE PESADA"""  # Fila[] Columna[]
+            """Revisa izquierda"""
+            if tablero[fila_actual][columna_actual - 1] != "#":
+                if columna_actual - 1 >= 0 and tablero[fila_actual][columna_actual - 1] < tablero[fila_actual][
+                    columna_actual] and [fila_actual, columna_actual - 1] not in caminos_visitados:
+                    opciones.append([fila_actual, columna_actual - 1])
+            print("Valora actual: ", tablero[fila_actual][columna_actual])
+
+            """Revisa arriba"""  # que es lo que tengo que buscar? 1.- Que no se salga del index 2.- El NUMERO anterior
+            if tablero[fila_actual - 1][columna_actual] != "#":
+                if fila_actual - 1 >= 0 and tablero[fila_actual - 1][columna_actual] < tablero[fila_actual][
+                    columna_actual] and [fila_actual - 1, columna_actual] not in caminos_visitados:
+                    opciones.append([fila_actual - 1, columna_actual])
+
+            """Revisa abajo"""
+            if tablero[fila_actual + 1][columna_actual] != "#":
+                if fila_actual + 1 <= len(tablero) and tablero[fila_actual + 1][columna_actual] < tablero[fila_actual][
+                    columna_actual] and [fila_actual + 1, columna_actual] not in caminos_visitados:
+                    opciones.append([fila_actual + 1, columna_actual])
+
+            """Revisa derecha"""
+            if tablero[fila_actual][columna_actual+1] != "#":
+                if columna_actual + 1 <= len(tablero[fila_actual]) and tablero[fila_actual][
+                    columna_actual + 1] < tablero[fila_actual][columna_actual] and \
+                        [fila_actual, columna_actual+1] not in caminos_visitados:
+                    opciones.append([fila_actual, columna_actual + 1])
+
+            for i in opciones:
+                if minimo > tablero[i[0]][i[1]]:
+                    minimo = tablero[i[0]][i[1]]
+                    pos = i
+            fila_actual = pos[0]
+            columna_actual = pos[1]
+            if pos not in camino:
+                camino.append(pos)
+            print("Camino actual: ", camino)
+            print("Minimo actual: ", minimo, " en: ", pos)
+            print("")
+
+            if [fila_actual, columna_actual] == maze.start:
+                camino.append([maze.start[0], maze.start[1]])
+                print(opciones)
+                print(camino)
+                process = False
+                return camino
+
+            contador += 1
+            if contador == 12:
+                print(lista_cerrada)
+                sys.exit(0)
+            """FIN PARTE PESADA"""
+
+
 if __name__ == '__main__':
+    g = 0
     maze = Maze()
     nodo = Nodo()
     maze.crear_tablero()
@@ -145,10 +219,11 @@ if __name__ == '__main__':
             print("Camino encontrado!")
             # process = False
             maze.imprimir_tablero()
+            nodo_actual.camino_de_regres(maze.tablero, maze.start, maze.end, lista_cerrada)
             break
-        lista_hijos = nodo_actual.dar_paso_astar(maze)    # Recibi una lista de hijos en donde a cada uno se le saco la f
+        lista_hijos = nodo_actual.dar_paso_astar(maze)  # Recibi una lista de hijos en donde a cada uno se le saco la f
         maze.imprimir_tablero()
-        for i in lista_hijos: lista_abierta.append(i)   # Se anadio la expansion a la lista abierta
+        for i in lista_hijos: lista_abierta.append(i)  # Se anadio la expansion a la lista abierta
         print("Lista abierta: ")
         for i in lista_abierta:
             print(i)
@@ -169,13 +244,6 @@ if __name__ == '__main__':
         print("Index valor minimo: ", lista_aux.index(min(lista_aux)))
         index_nodo_menor = lista_aux.index(min(lista_aux))
         nodo_actual = lista_abierta[index_nodo_menor]
-        print("Costo actual: ", nodo_actual.g)
+        print("Costo actual: ", g)
+        g += 1
         """" Aqui seria el final del ciclo"""
-
-
-
-
-
-
-
-
