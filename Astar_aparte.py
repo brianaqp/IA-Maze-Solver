@@ -1,6 +1,7 @@
 import sys
 import math
-
+import copy
+import matplotlib.pyplot as plt
 
 class Maze():
     def __init__(self):
@@ -10,17 +11,18 @@ class Maze():
         self.tablero = self.crear_tablero()
         self.tablero_color = []
 
+
     def crear_tablero(self):
         tablero = [
             [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
-            [1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1],
-            [1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1],
+            [1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1],
+            [1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1],
+            [1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1],
+            [1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1],
+            [1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         ]
         return tablero
@@ -29,6 +31,12 @@ class Maze():
         for i in range(len(self.tablero)):
             for j in range(len(self.tablero[i])):
                 print(str(self.tablero[i][j]).ljust(2), end=' ')
+            print()
+
+    def imprimir_tablero_ext(self, tablero):
+        for i in range(len(tablero)):
+            for j in range(len(tablero[i])):
+                print(str(tablero[i][j]).ljust(2), end=' ')
             print()
 
     def ambientar_tablero(self, start, end):
@@ -49,14 +57,61 @@ class Maze():
         else:
             self.tablero[end[0]][end[1]] = "X"
 
-    def f(self, inicio, final):
-        """Funcion evaluacion"""
-        pass
+    def finalizar_juego(self, camino):
+        solo_posiciones = []
+        aux = 0
+        print("")
+        for i in camino:
+            print(i.position, end=", ")
+            aux += 1
+            solo_posiciones.append(i.position)
+            if aux == 6:
+                print("")
+                aux = 0
+        tablero_coloredo = copy.deepcopy(self.tablero)
+        print("asdasdasd", solo_posiciones)
+        self.colorear_laberinto(tablero_coloredo, solo_posiciones)
 
-    def h(self, inicio, final):
-        """heuristica, costo de movernos entre fichas"""
-        pass
+    def colorear_laberinto(self, tablero, camino):
+        """Colorear el laberinto para su prueba final"""
+        print("\nTablero original")
+        self.imprimir_tablero_ext(tablero)
+        print("\nCambiar los obstaculos por un numero mas grande")
+        self.cambia_un_valor_en_tablero(tablero, "#", 99)
+        self.imprimir_tablero_ext(tablero)
+        print("\nLos 0 sobrantes ahora tendran un #")
+        self.cambia_un_valor_en_tablero(tablero, 0, "#")
+        self.imprimir_tablero_ext(tablero)
+        print("")
+        print("Ahora cambiar la ruta")
+        while len(camino) > 0:
+            fila = camino[len(camino)-1][0]
+            colu = camino[len(camino)-1][1]
+            tablero[fila][colu] = 0
+            camino.pop()
+        self.imprimir_tablero_ext(tablero)
+        print("")
+        print("Ahora cambiar los caminos no escogidos")
+        for i in range(1,90):
+            self.cambia_un_valor_en_tablero(tablero, i, 35)
+        self.imprimir_tablero_ext(tablero)
+        print("\nPor ultimo cambiar los asteriscos")
+        self.cambia_un_valor_en_tablero(tablero, "#", 80)
+        # y la linea
+        self.cambia_un_valor_en_tablero(tablero, 0, 1)
+        print("")
+        self.imprimir_tablero_ext(tablero)
+        plt.imshow(tablero, cmap='coolwarm', interpolation='nearest')
+        # plt.matshow(tablero)
+        # plt.colorbar()
+        plt.show()
 
+    def cambia_un_valor_en_tablero(self, tablero, var_old, var_new):
+        for fila in range(len(tablero)):
+            for columna in range(len(tablero[fila])):
+                if tablero[fila][columna] == var_old:
+                    tablero[fila][columna] = var_new
+        return tablero
 
 class Nodo():
     """Necesitamos una clase nodo para ir trabajando recursivamente"""
@@ -101,7 +156,7 @@ class Nodo():
         for posicion in direcciones:
             print("Direcciones del nodo actual")
             print(posicion)
-            hijo = Nodo(None, posicion)
+            hijo = Nodo(nodo_actual, posicion)
             hijo.funcion_evaluacion(maze)
             hijo.marcar_movimiento(maze.tablero)
             lista_hijos.append(hijo)
@@ -123,73 +178,21 @@ class Nodo():
         self.f = g + self.h
         print(self.f)
 
-    def camino_de_regres(self, tablero, start, end, lista_cerrada):
+    def camino_de_regres(self, camino):
         """Esta funcion lo que hara es basicamente ir
            restando para encontrar el camino mas corto. """
-        contador = 0
-        pos = []
-        print("--- En funcion camino_de_regres():")
-        process = True
-        minimo = tablero[maze.end[0]][maze.end[1]]
-        camino = []
-        caminos_visitados = []
-        opciones = []
-        fila_actual = maze.end[0]
-        columna_actual = maze.end[1]
-        camino.append(maze.end)
-        while process:
+        nodo_current = self
+        nodo_padre = self.padre
+        camino.append(nodo_current)
+        nodo_current = nodo_padre
+        if self.position == maze.start:
+            return camino
+        else:
+            nodo_current.camino_de_regres(camino)
+            return camino
 
-            """ INICIO PARTE PESADA"""  # Fila[] Columna[]
-            """Revisa izquierda"""
-            if tablero[fila_actual][columna_actual - 1] != "#":
-                if columna_actual - 1 >= 0 and tablero[fila_actual][columna_actual - 1] < tablero[fila_actual][
-                    columna_actual] and [fila_actual, columna_actual - 1] not in caminos_visitados:
-                    opciones.append([fila_actual, columna_actual - 1])
-            print("Valora actual: ", tablero[fila_actual][columna_actual])
 
-            """Revisa arriba"""  # que es lo que tengo que buscar? 1.- Que no se salga del index 2.- El NUMERO anterior
-            if tablero[fila_actual - 1][columna_actual] != "#":
-                if fila_actual - 1 >= 0 and tablero[fila_actual - 1][columna_actual] < tablero[fila_actual][
-                    columna_actual] and [fila_actual - 1, columna_actual] not in caminos_visitados:
-                    opciones.append([fila_actual - 1, columna_actual])
 
-            """Revisa abajo"""
-            if tablero[fila_actual + 1][columna_actual] != "#":
-                if fila_actual + 1 <= len(tablero) and tablero[fila_actual + 1][columna_actual] < tablero[fila_actual][
-                    columna_actual] and [fila_actual + 1, columna_actual] not in caminos_visitados:
-                    opciones.append([fila_actual + 1, columna_actual])
-
-            """Revisa derecha"""
-            if tablero[fila_actual][columna_actual+1] != "#":
-                if columna_actual + 1 <= len(tablero[fila_actual]) and tablero[fila_actual][
-                    columna_actual + 1] < tablero[fila_actual][columna_actual] and \
-                        [fila_actual, columna_actual+1] not in caminos_visitados:
-                    opciones.append([fila_actual, columna_actual + 1])
-
-            for i in opciones:
-                if minimo > tablero[i[0]][i[1]]:
-                    minimo = tablero[i[0]][i[1]]
-                    pos = i
-            fila_actual = pos[0]
-            columna_actual = pos[1]
-            if pos not in camino:
-                camino.append(pos)
-            print("Camino actual: ", camino)
-            print("Minimo actual: ", minimo, " en: ", pos)
-            print("")
-
-            if [fila_actual, columna_actual] == maze.start:
-                camino.append([maze.start[0], maze.start[1]])
-                print(opciones)
-                print(camino)
-                process = False
-                return camino
-
-            contador += 1
-            if contador == 12:
-                print(lista_cerrada)
-                sys.exit(0)
-            """FIN PARTE PESADA"""
 
 
 if __name__ == '__main__':
@@ -209,6 +212,7 @@ if __name__ == '__main__':
     nodo.funcion_evaluacion(maze)
     lista_abierta = []
     lista_cerrada = []
+    camino = []
     # Ya lo inializamos, ahora solo trabarlo en un while
     lista_abierta.append(nodo)
     print(nodo)
@@ -219,7 +223,8 @@ if __name__ == '__main__':
             print("Camino encontrado!")
             # process = False
             maze.imprimir_tablero()
-            nodo_actual.camino_de_regres(maze.tablero, maze.start, maze.end, lista_cerrada)
+            camino = nodo_actual.camino_de_regres(camino)
+            maze.finalizar_juego(camino)
             break
         lista_hijos = nodo_actual.dar_paso_astar(maze)  # Recibi una lista de hijos en donde a cada uno se le saco la f
         maze.imprimir_tablero()
@@ -246,4 +251,5 @@ if __name__ == '__main__':
         nodo_actual = lista_abierta[index_nodo_menor]
         print("Costo actual: ", g)
         g += 1
+
         """" Aqui seria el final del ciclo"""
