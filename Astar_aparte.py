@@ -11,7 +11,6 @@ class Maze():
         self.tablero = self.crear_tablero()
         self.tablero_color = []
 
-
     def crear_tablero(self):
         tablero = [
             [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -69,7 +68,6 @@ class Maze():
                 print("")
                 aux = 0
         tablero_coloredo = copy.deepcopy(self.tablero)
-        print("asdasdasd", solo_posiciones)
         self.colorear_laberinto(tablero_coloredo, solo_posiciones)
 
     def colorear_laberinto(self, tablero, camino):
@@ -115,18 +113,17 @@ class Maze():
 
 class Nodo():
     """Necesitamos una clase nodo para ir trabajando recursivamente"""
-
-    def __init__(self, padre=None, position=None):
+    def __init__(self, g, padre=None, position=None):
         self.padre = padre
         self.position = position
         self.k = 0
         # Funcion evaluacion
         self.f = 0
-        self.g = 1
+        self.g = g
         self.h = 0
         self.nivel = 0
 
-    def dar_paso_astar(self, maze):
+    def dar_paso_astar(self, g, maze):
         """Da los pasos buscando obtaculos, espacios ya ocupados y el final"""
         #   Posiciones actuales
         tablero = maze.tablero
@@ -134,7 +131,6 @@ class Nodo():
         columna = self.position[1]
         direcciones = []
         lista_hijos = []
-        print("Fila: ", fila, "Columna: ", columna)
         """Revisa arriba"""  # que es lo que tengo que revisar? 1.- Si se salio del borde, y si hay obstruccion
         if fila - 1 >= 0 and tablero[fila - 1][columna] != "#" and tablero[fila - 1][columna] == 0 or tablero[fila - 1][
             columna] == "X":  # si mi fila-1 no se sale del index, ok; y si es diferente de #, ok.
@@ -151,33 +147,24 @@ class Nodo():
         if columna - 1 >= 0 and tablero[fila][columna - 1] != "#" and tablero[fila][columna - 1] == 0 or tablero[fila][
             columna - 1] == "X":
             direcciones.append([fila, columna - 1])
-        print("Direcciones conseguidas: ", direcciones)
         if direcciones is None:
             return
         for posicion in direcciones:
-            print("Direcciones del nodo actual")
-            print(posicion)
-            hijo = Nodo(nodo_actual, posicion)
+            hijo = Nodo(g, nodo_actual, posicion)
             hijo.funcion_evaluacion(maze)
             hijo.marcar_movimiento(maze.tablero)
             lista_hijos.append(hijo)
         return lista_hijos
 
     def marcar_movimiento(self, tablero):
-        print("ALSJDLAKSD")
-        print(tablero[self.position[0]][self.position[1]])
         tablero[self.position[0]][self.position[1]] = int(self.f)
 
     def funcion_evaluacion(self, maze):
         end = maze.end
-        print("\nEn funcion_evaluacion...")
-        print("Punto actual: ", self.position)
-        print("Punto destino: ", end)
         x_final, x_inicial = end[0], self.position[0]
         y_final, y_inicial = end[1], self.position[1]
         self.h = math.sqrt((x_final - x_inicial) ** 2 + (y_final - y_inicial) ** 2)
         self.f = self.g + self.h
-        print(self.f)
 
     def camino_de_regres(self, camino):
         """Esta funcion lo que hara es basicamente ir
@@ -192,14 +179,24 @@ class Nodo():
             nodo_current.camino_de_regres(camino)
             return camino
 
-
-
-
+class Node_Voraz(Nodo):
+    def __init__(self):
+        super(Node_Voraz, self).__init__()
+        self.g = 0
 
 if __name__ == '__main__':
-    g = 0
+    print("1.- Astar \n2.- Voraz")
+    seleccion = int(input())
+    if seleccion > 2 or seleccion < 1:
+        print("Escoja bien la opcion")
+        sys.exit(0)
+    if seleccion == 1:
+        nodo = Nodo(1)
+        g=1
+    if seleccion == 2:
+        nodo = Nodo(0)
+        g=0
     maze = Maze()
-    nodo = Nodo()
     maze.crear_tablero()
     maze.start = [1, 1]
     maze.end = [5, 18]
@@ -216,7 +213,6 @@ if __name__ == '__main__':
     camino = []
     # Ya lo inializamos, ahora solo trabarlo en un while
     lista_abierta.append(nodo)
-    print(nodo)
     process = True
     nodo_actual = nodo
     while process:
@@ -226,32 +222,19 @@ if __name__ == '__main__':
             maze.imprimir_tablero()
             camino = nodo_actual.camino_de_regres(camino)
             maze.finalizar_juego(camino)
+            print(nodo_actual.g)
             break
-        lista_hijos = nodo_actual.dar_paso_astar(maze)  # Recibi una lista de hijos en donde a cada uno se le saco la f
+        lista_hijos = nodo_actual.dar_paso_astar(g, maze)  # Recibi una lista de hijos en donde a cada uno se le saco la f
         maze.imprimir_tablero()
         for i in lista_hijos: lista_abierta.append(i)  # Se anadio la expansion a la lista abierta
-        print("Lista abierta: ")
-        for i in lista_abierta:
-            print(i)
         lista_abierta.remove(nodo_actual)
         lista_cerrada.append(nodo_actual)
-        print("Lista abierta con el actual removido: ")
-        for i in lista_abierta:
-            print(i, " f:", i.f)
-        print("Lista cerrada: ")
-        for i in lista_cerrada:
-            print(i)
         #   Ahora sigue ordenar la lista de mayor a menor
         contador = 0
         lista_aux = []
         for i in lista_abierta:
-            print(contador, ":", i.f)
             lista_aux.append(i.f)
-        print("Index valor minimo: ", lista_aux.index(min(lista_aux)))
         index_nodo_menor = lista_aux.index(min(lista_aux))
         nodo_actual = lista_abierta[index_nodo_menor]
-        print("Iteracion: ", g)
-        g += 1
-
 
         """" Aqui seria el final del ciclo"""
