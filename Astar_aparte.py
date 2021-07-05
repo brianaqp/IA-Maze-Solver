@@ -122,6 +122,7 @@ class Nodo():
         self.k = 0
         # Funcion evaluacion
         self.f = 0
+        self.g = 1
         self.h = 0
         self.nivel = 0
 
@@ -175,7 +176,7 @@ class Nodo():
         x_final, x_inicial = end[0], self.position[0]
         y_final, y_inicial = end[1], self.position[1]
         self.h = math.sqrt((x_final - x_inicial) ** 2 + (y_final - y_inicial) ** 2)
-        self.f = g + self.h
+        self.f = self.g + self.h
         print(self.f)
 
     def camino_de_regres(self, camino):
@@ -249,7 +250,8 @@ if __name__ == '__main__':
         print("Index valor minimo: ", lista_aux.index(min(lista_aux)))
         index_nodo_menor = lista_aux.index(min(lista_aux))
         nodo_actual = lista_abierta[index_nodo_menor]
-        print("Costo actual: ", g)
+        print("Iteracion: ", g)
         g += 1
+
 
         """" Aqui seria el final del ciclo"""
